@@ -372,3 +372,79 @@ public function __invoke(Request $request)
         return CustomResponse::setSuccessResponse(Response::HTTP_OK, Lang::get('auth.logout'));
     }
 ```
+
+
+
+## Step 9 - Handler
+
+- Edit render in Handler.php
+
+```
+if($e instanceof NotFoundHttpException){
+    return CustomResponse::setFailResponse(Lang::get('errors.route.not_found'), Response::HTTP_NOT_FOUND);
+}
+```
+
+- add error in resources/lang/en/errors.php
+
+```
+ 'route' => [
+        'not_found' => 'Incorrect route'
+    ],
+```
+
+## Step 10 - Bonus - Language Middleware
+
+- Create Set Locale Middleware
+
+```
+<?php
+
+namespace App\Http\Middleware;
+
+use Closure;
+use Illuminate\Support\Facades\App;
+
+class SetLocale
+{
+    /**
+     * Handle an incoming request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure  $next
+     * @return mixed
+     */
+    public function handle($request, Closure $next)
+    {
+
+        $locale = substr($request->server('HTTP_ACCEPT_LANGUAGE'), 0, 2);
+
+        if ($locale == 'it') {
+            $locale = 'it';
+        } else {
+            $locale = 'en';
+        }
+
+        App::setLocale($locale);
+
+        return $next($request);
+    }
+}
+```
+
+- Add middleware to Kernel.php
+
+```
+ protected $middleware = [
+        // \App\Http\Middleware\TrustHosts::class,
+        \App\Http\Middleware\TrustProxies::class,
+        \App\Http\Middleware\SetLocale::class,
+        \Fruitcake\Cors\HandleCors::class,
+        \App\Http\Middleware\CheckForMaintenanceMode::class,
+        \Illuminate\Foundation\Http\Middleware\ValidatePostSize::class,
+        \App\Http\Middleware\TrimStrings::class,
+        \App\Http\Middleware\SetLocale::class,
+        \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
+    ];
+
+```
