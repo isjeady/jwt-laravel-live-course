@@ -98,3 +98,17 @@ Config config/auth.php
         // ],
     ],
 ```
+
+## Step 3 - Creazione Controllers
+
+Creazione del Controller
+
+```
+php artisan make:controller Api/Auth/LoginController
+
+php artisan make:controller Api/Auth/RegisterController
+
+php artisan make:controller Api/Auth/MeController
+
+php artisan make:controller Api/Auth/LogoutController
+```
