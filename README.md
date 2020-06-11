@@ -293,3 +293,64 @@ if (!$token = auth()->attempt($request->only('email', 'password'))) {
     'credential_incorrect' => 'Credential Incorrect',
     'logout' => 'Successfully logged out',
 ```
+
+
+
+## Step 7 - JWT Middleware & Me
+
+```
+php artisan make:middleware JwtMiddleware
+```
+- Add Middleware in Kernel.php
+  
+```
+$routeMiddleware = [
+    ....
+'jwt.verify' => \App\Http\Middleware\JwtMiddleware::class,
+```
+
+- New API
+
+```
+Route::group(['middleware' => ['jwt.verify'], 'prefix' => 'auth', 'namespace' => 'Api\Auth'], function () {
+    //Route::post('/logout', 'LogooutController');
+    Route::get('/me', 'MeController');
+});
+```
+
+- Resource
+
+```
+php artisan make:resource PrivateUserResource
+```
+
+- Edit PrivateUserResource
+
+```
+return [
+            'id' => $this->id,
+            'email' => $this->email,
+            'name' => $this->name
+        ];
+```
+- JWT MIDDLEWARE 
+  
+```
+public function handle($request, Closure $next)
+    {
+        try {
+            $user = JWTAuth::parseToken()->authenticate();
+        } catch (Exception $e) {
+
+            if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenInvalidException) {
+                return CustomResponse::setFailResponse(Lang::get('errors.token.invalid'), Response::HTTP_NOT_ACCEPTABLE);
+            } else if ($e instanceof \Tymon\JWTAuth\Exceptions\TokenExpiredException) {
+                return CustomResponse::setFailResponse(Lang::get('errors.token.expired'), Response::HTTP_NOT_ACCEPTABLE);
+            } else {
+                return CustomResponse::setFailResponse(Lang::get('errors.token.not_found'), Response::HTTP_UNAUTHORIZED);
+            }
+        }
+
+        return $next($request);
+    }
+```
