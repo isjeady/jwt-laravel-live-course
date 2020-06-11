@@ -112,3 +112,118 @@ php artisan make:controller Api/Auth/MeController
 
 php artisan make:controller Api/Auth/LogoutController
 ```
+
+
+## Step 4 - Register
+
+- Creazione della Request 
+
+``` php artisan make:request Auth/RegisterRequest ```
+
+- Modifica della Request
+
+```
+public function authorize()
+    {
+        return true;
+    }
+....
+ public function rules()
+    {
+        return [
+            'email' => 'required|email|unique:users,email',
+            'name' => 'required',
+            'password' => 'required'
+        ];
+    }
+...
+```
+
+- Add API
+
+```
+Route::post('auth/register', 'Api\Auth\RegisterController@action')->name('register');
+```
+
+- Add Body in Post
+
+```
+{
+  "name" : "Marco Rossi",
+  "email" : "marco.rossi@gmail.com",
+  "password" : "q1w2e3"
+}
+```
+
+- Registrazione Utente
+
+Creazione di un evento per registrazione utente
+
+```
+php artisan make:event UserRegisteredEvent
+php artisan make:listener UserRegisteredListener
+```
+
+```
+class UserRegisteredEvent
+{
+    use Dispatchable, InteractsWithSockets, SerializesModels;
+
+    public $user;
+    /**
+     * Create a new event instance.
+     *
+     * @return void
+     */
+    public function __construct(User $user)
+    {
+        $this->user = $user;
+        //
+    }
+
+    /**
+     * Get the channels the event should broadcast on.
+     *
+     * @return \Illuminate\Broadcasting\Channel|array
+     */
+    public function broadcastOn()
+    {
+        return new PrivateChannel('channel-name');
+    }
+}
+```
+
+- Listener
+
+```
+ public function handle($event)
+{
+    logger('Listener SendEmailNotification');
+
+     logger($event->user->email);
+}
+```
+
+- Controller RegisterController
+
+```
+ $user = User::create([
+            'name' => $request['name'],
+            'email' => $request['email'],
+            'password' => Hash::make($request['password'])
+        ]);
+
+        if ($user != null && array_key_exists('id', $user->toArray())) {
+            event(new UserRegisteredEvent($user));
+        }
+
+        return $user;
+```
+
+- Add Listener e EventServiceProvider
+
+```
+'App\Events\UserRegisteredEvent' => [
+            'App\Listeners\UserRegisteredListener'
+        ]
+```
