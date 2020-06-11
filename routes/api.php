@@ -19,7 +19,7 @@ Route::post('auth/register', 'Api\Auth\RegisterController@action')->name('regist
 Route::post('auth/login', 'Api\Auth\LoginController')->name('login');
 
 Route::group(['middleware' => ['jwt.verify'], 'prefix' => 'auth', 'namespace' => 'Api\Auth'], function () {
-    //Route::post('/logout', 'LogoutController');
+    Route::post('/logout', 'LogoutController');
     Route::get('/me', 'MeController');
 });
 

@@ -354,3 +354,21 @@ public function handle($request, Closure $next)
         return $next($request);
     }
 ```
+
+
+
+## Step 8 - Logout
+
+```
+  Route::post('/logout', 'LogoutController');
+```
+
+
+```
+public function __invoke(Request $request)
+    {
+        //$request->wantsJson();
+        auth()->logout();
+        return CustomResponse::setSuccessResponse(Response::HTTP_OK, Lang::get('auth.logout'));
+    }
+```
