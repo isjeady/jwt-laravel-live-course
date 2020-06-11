@@ -227,3 +227,49 @@ class UserRegisteredEvent
             'App\Listeners\UserRegisteredListener'
         ]
 ```
+
+
+## Step 5 - Login
+
+- Create Route
+  
+```
+Route::post('/auth/login', 'Api\Auth\LoginController')->name('login');
+```
+- Create LoginRequest
+
+```
+php artisan make:request Auth/LoginRequest
+```
+- LoginRequest
+```
+return true
+....
+return [
+            'email' => 'required',
+            'password' => 'required'
+        ];
+```
+- LoginController 
+```
+
+class LoginController extends Controller
+{
+
+    public function __invoke(LoginRequest $request)
+    {
+
+        //$validated = $request->validated();
+
+        if (!$token = auth()->attempt($request->only('email', 'password'))) {
+            $errorMsg = "error credenziali";
+            return  $errorMsg;
+        }
+
+        return response()->json([
+            'token' => $token
+        ]);
+    }
+}
+
+```
