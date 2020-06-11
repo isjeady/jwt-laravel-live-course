@@ -273,3 +273,23 @@ class LoginController extends Controller
 }
 
 ```
+
+
+## Step 6 - Response e Language
+
+- Create Custom response
+- Edit Login Controller
+  
+```
+if (!$token = auth()->attempt($request->only('email', 'password'))) {
+    $errorMsg = "error credenziali";
+    return CustomResponse::setFailResponse($errorMsg, Response::HTTP_NOT_ACCEPTABLE, []);
+}
+```
+
+- Add String Language resources/lang/en or lang/it
+
+```
+    'credential_incorrect' => 'Credential Incorrect',
+    'logout' => 'Successfully logged out',
+```
